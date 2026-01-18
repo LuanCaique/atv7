@@ -1,0 +1,75 @@
+CREATE DATABASE db_SP
+USE db_SP
+
+CREATE TABLE tb_clientes(
+	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	nome VARCHAR(50),
+	data_nasc DATE);
+
+INSERT INTO tb_clientes (nome, data_nasc)
+VALUES ('Luan Caique','1998-10-13'),
+	  ('Endryck Comape','2002-12-27'),
+	  ('Yohanne Comape','2004-01-09'),
+	  ('Luanne Costa','2002-09-14');
+
+DELIMITER //
+	CREATE PROCEDURE idade (
+		IN p_id INT,
+		OUT p_idade INT)
+	BEGIN
+		SELECT YEAR(CURDATE()) - YEAR(data_nasc) - (DATE_FORMAT(CURDATE(), '%m%d') < DATE_FORMAT(data_nasc, '%m%d'))
+		INTO p_idade
+		ROM tb_clientes
+		WHERE id = p_id;
+END;
+//
+DELIMITER ;
+
+DELIMITER //
+	CREATE PROCEDURE menormaior (
+		IN p_id INT,
+		OUT p_idade INT,
+		OUT p_classificacao VARCHAR(10))
+	BEGIN
+		SELECT YEAR(CURDATE()) - YEAR(data_nasc) - (DATE_FORMAT(CURDATE(), '%m%d') < DATE_FORMAT(data_nasc, '%m%d'))
+			INTO p_idade
+			FROM tb_clientes
+			WHERE id = p_id;
+    
+    IF p_idade >= 18 THEN
+		SET p_classificacao = 'Maior';
+	ELSE 
+        SET p_classificacao = 'Menor';
+	END IF;
+END;
+//
+DELIMITER ;
+
+SET @idade :=0;
+SET @class :='';
+
+
+CALL idade(1, @idade);
+SELECT 'Cliente 1 - Idade' AS info, @idade;
+CALL menormaior(1, @idade, @class);
+SELECT 'Cliente 1 - Menor/Maior' AS info, @idade, @class;
+
+
+CALL idade(2, @idade);
+SELECT 'Cliente 2 - Idade' AS info, @idade;
+CALL menormaior(2, @idade, @class);
+SELECT 'Cliente 2 - Menor/Maior' AS info, @idade, @class;
+
+
+CALL idade(3, @idade);
+SELECT 'Cliente 3 - Idade' AS info, @idade;
+CALL menormaior(3, @idade, @class);
+SELECT 'Cliente 3 - Menor/Maior' AS info, @idade, @class;
+
+
+CALL idade(4, @idade);
+SELECT 'Cliente 4 - Idade' AS info, @idade;
+CALL menormaior(4, @idade, @class);
+SELECT 'Cliente 4 - Menor/Maior' AS info, @idade, @class;
+
+
